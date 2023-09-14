@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <string.h>
+#include <locale.h> //necessário para usar setlocale
+
+// Usando ponteiros para character para trocar os valores de A e B;
+
+void swap(char **a, char **b) {
+    char *temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+// Função para particionar o vetor
+
+int Particao(char **vetor, int inf, int sup, int *comparacao, int *trocas) {
+    char *pivot = vetor[inf];
+    int inicio = inf + 1;
+    int fim = sup;
+
+    while (1) {
+        while (inicio <= fim && strcmp(vetor[inicio], pivot) <= 0) {
+            (*comparacao)++;
+            inicio++;
+        }
+        while (fim > inf && strcmp(vetor[fim], pivot) > 0) {
+            (*comparacao)++;
+            fim--;
+        }
+        if (inicio <= fim) {
+            (*trocas)++;
+            swap(&vetor[inicio], &vetor[fim]);
+        } else {
+            break;
+        }
+    }
+    (*trocas)++;
+    swap(&vetor[inf], &vetor[fim]);
+    return fim;
+}
+
+void quicksort(char **vetor, int inf, int sup, int *comparacao, int *trocas) {
+    if (inf < sup) {
+        int p = Particao(vetor, inf, sup, comparacao, trocas);
+
+        quicksort(vetor, inf, p - 1, comparacao, trocas);
+        quicksort(vetor, p + 1, sup, comparacao, trocas);
+    }
+}
+
+int main() {
+	setlocale(LC_ALL, "Portuguese");
+    char *vetor[20] = {
+		"maçã", "banana", "pera", "uva", "laranja", "abacaxi", "limão", "manga", "abacate", "kiwi",
+		"cereja", "morango", "pêssego", "goiaba", "melancia", "framboesa", "amora", "caqui", "figo", "papaya"
+    };
+
+    int comparacao = 0;
+    int trocas = 0;
+
+    int vetor_size = sizeof(vetor) / sizeof(vetor[0]);
+    quicksort(vetor, 0, vetor_size - 1, &comparacao, &trocas);
+
+    
+	// Imprimir o vetor com a lista das frutas já ordenadas
+	
+    printf("Vetor ordenado:\n");
+    for (int i = 0; i < vetor_size; i++) {
+        printf("(%d) %s\n", i + 1, vetor[i]);
+    }
+
+    
+	// Aqui é gerado o arquivo de saída já ordenado, e com o layoute exigido no documento da atividade
+    
+    FILE *output_file = fopen("saida.txt", "w");
+    if (output_file != NULL) {
+        fprintf(output_file, "Número de trocas: %d\n", trocas);
+        fprintf(output_file, "Número de comparações: %d\n", comparacao);
+        fprintf(output_file, "Vetor ordenado:\n");
+        for (int i = 0; i < vetor_size; i++) {
+            fprintf(output_file, "(%d) %s\n", i + 1, vetor[i]);
+        }
+        fclose(output_file);
+    } else {
+        printf("Erro ao criar arquivo de saída.\n");// mostrará caso aconteceça algum erro 
+    }
+	
+	
+    // Calcular e imprimir a mediana
+    char *mediana = vetor[vetor_size / 2 - 1]; // com este calculo é possivel realizar a mediana porem sem o -1 cairia na laranja (11), com ele cai no kiwi (10)
+    printf("\nMediana: %s\n", mediana);// mostra a mediana
+    printf("\nTrocas: %d\n", trocas);// mostra o número de trocas realizadas
+    printf("Comparações: %d\n", comparacao);// mostra o número de comparações realizadas
+
+    return 0;
+}
